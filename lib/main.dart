@@ -1,6 +1,9 @@
-import './transaction.dart';
+import 'package:expense_app/widgets/new_transactions.dart';
+import 'package:expense_app/widgets/transaction_list.dart';
+import 'package:expense_app/widgets/user_transactions.dart';
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
+
+import 'models/transaction.dart';
 
 void main() {
   runApp(MyApp());
@@ -11,14 +14,20 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      debugShowCheckedModeBanner: false,
       title: 'Flutter Demo',
       home: MyHomePage(),
     );
   }
 }
 
-class MyHomePage extends StatelessWidget {
-  final List<Transaction> transactions = [
+class MyHomePage extends StatefulWidget {
+  @override
+  _MyHomePageState createState() => _MyHomePageState();
+}
+
+class _MyHomePageState extends State<MyHomePage> {
+  final List<Transaction> _userTransactions = [
     Transaction(
       id: 't1',
       title: 'New Shoes',
@@ -33,102 +42,69 @@ class MyHomePage extends StatelessWidget {
     ),
   ];
 
-  final titleController = TextEditingController();
-  final amountController = TextEditingController();
+  void _addNewTransaction(String txtitle, double txamount) {
+    final newTx = Transaction(
+      id: DateTime.now().toString(),
+      title: txtitle,
+      amount: txamount,
+      date: DateTime.now(),
+    );
+    setState(() {
+      _userTransactions.add(newTx);
+    });
+  }
+
+  void _startAddNewTransaction(BuildContext ctx) {
+    showModalBottomSheet(
+        context: ctx,
+        builder: (_) {
+          return GestureDetector(
+            onTap: () {},
+            child: NewTransactions(
+              _addNewTransaction,
+            ),
+            behavior: HitTestBehavior.opaque,
+          );
+        });
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: Text('Flutter App'),
-      ),
-      body: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Container(
-            width: double.infinity,
-            child: Card(
-              color: Colors.blue,
-              child: Text(
-                "Chart !",
-              ),
-              elevation: 5,
+        actions: [
+          IconButton(
+            onPressed: () => _startAddNewTransaction(context),
+            icon: Icon(
+              Icons.add,
             ),
-          ),
-          Card(
-            elevation: 5,
-            child: Container(
-              padding: EdgeInsets.all(10),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  TextField(
-                    decoration: InputDecoration(
-                      labelText: 'Title',
-                    ),
-                    controller: titleController,
-                  ),
-                  TextField(
-                    decoration: InputDecoration(
-                      labelText: 'Amount',
-                    ),
-                    controller: amountController,
-                    // ),
-                    // onChanged: (value) {
-                    //   amountInpiut = value;
-                    // },
-                  ),
-                  FlatButton(
-                    onPressed: () {},
-                    child: Text('Add Transaction'),
-                    textColor: Colors.purple,
-                  ),
-                ],
-              ),
-            ),
-          ),
-          Column(
-              children: transactions.map((tx) {
-            return Row(
-              children: [
-                Container(
-                  margin: EdgeInsets.symmetric(horizontal: 15, vertical: 10),
-                  child: Text(
-                    '\$${tx.amount}',
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 20,
-                      color: Colors.purple,
-                    ),
-                  ),
-                  decoration: BoxDecoration(
-                    border: Border.all(
-                      color: Colors.purple,
-                      width: 2,
-                    ),
-                  ),
-                  padding: EdgeInsets.all(10),
-                ),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      tx.title,
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 16,
-                      ),
-                    ),
-                    Text(
-                      DateFormat.yMMMd().format(tx.date),
-                      style: TextStyle(color: Colors.grey),
-                    ),
-                  ],
-                ),
-              ],
-            );
-          }).toList()),
+          )
         ],
+      ),
+      body: SingleChildScrollView(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Container(
+              width: double.infinity,
+              child: Card(
+                color: Colors.blue,
+                child: Text(
+                  "Chart !",
+                ),
+                elevation: 5,
+              ),
+            ),
+            TransactionList(_userTransactions),
+          ],
+        ),
+      ),
+      floatingActionButton: FloatingActionButton(
+        child: Icon(
+          Icons.add,
+        ),
+        onPressed: () => _startAddNewTransaction(context),
       ),
     );
   }
