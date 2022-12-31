@@ -4,57 +4,78 @@ import '../models/transaction.dart';
 
 class TransactionList extends StatelessWidget {
   final List<Transaction> transactions;
-  TransactionList(this.transactions);
+  final Function deleteTx;
+
+  TransactionList(this.transactions, this.deleteTx);
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: 360,
-      child: ListView.builder(
-        itemBuilder: (ctx, index) {
-          return Card(
-            child: Row(
-              children: [
-                Container(
-                  margin: EdgeInsets.symmetric(horizontal: 15, vertical: 10),
-                  child: Text(
-                    '\$${transactions[index].amount.toStringAsFixed(2)}',
+      height: 500,
+      child: transactions.isEmpty
+          ? Center(
+              child: Column(
+                children: [
+                  Text(
+                    "No Transactions added yet!",
                     style: TextStyle(
-                      fontWeight: FontWeight.bold,
                       fontSize: 20,
-                      color: Colors.purple,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black,
                     ),
                   ),
-                  decoration: BoxDecoration(
-                    border: Border.all(
-                      color: Colors.purple,
-                      width: 2,
+                  SizedBox(
+                    height: 10,
+                  ),
+                  Container(
+                    height: 200,
+                    child: Image.asset(
+                      'assets/images/waiting.png',
+                      fit: BoxFit.cover,
                     ),
                   ),
-                  padding: EdgeInsets.all(10),
-                ),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      transactions[index].title,
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 16,
+                ],
+              ),
+            )
+          : ListView.builder(
+              itemBuilder: (ctx, index) {
+                return Card(
+                  elevation: 5,
+                  margin: EdgeInsets.symmetric(
+                    vertical: 8,
+                    horizontal: 5,
+                  ),
+                  child: ListTile(
+                    leading: CircleAvatar(
+                      radius: 30,
+                      child: Padding(
+                        padding: const EdgeInsets.all(6.0),
+                        child: FittedBox(
+                          child: Text(
+                            '\$${transactions[index].amount}',
+                          ),
+                        ),
                       ),
                     ),
-                    Text(
-                      DateFormat.yMMMd().format(transactions[index].date),
-                      style: TextStyle(color: Colors.grey),
+                    title: Text(
+                      transactions[index].title,
+                      style: Theme.of(context).textTheme.titleLarge,
                     ),
-                  ],
-                ),
-              ],
+                    subtitle: Text(
+                      DateFormat.yMMMMd().format(
+                        transactions[index].date,
+                      ),
+                    ),
+                    trailing: IconButton(
+                      onPressed: () => deleteTx(transactions[index].id),
+                      icon: Icon(Icons.delete),
+                      color: Theme.of(context).errorColor,
+                    ),
+                  ),
+                );
+              },
+              itemCount: transactions.length,
             ),
-          );
-        },
-        itemCount: transactions.length,
-      ),
     );
   }
 }
